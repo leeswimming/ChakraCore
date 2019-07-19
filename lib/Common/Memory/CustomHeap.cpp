@@ -267,7 +267,7 @@ Allocation* Heap<TAlloc, TPreReservedAlloc>::Alloc(size_t bytes, ushort pdataCou
                 MemoryOperationLastError::RecordLastErrorAndThrow();
             }
         }
-        Assert(memBasicInfo.Protect == PAGE_EXECUTE);
+        Assert(memBasicInfo.Protect == PAGE_EXECUTE_READ);
 #endif
 
         Allocation* allocation = nullptr;
@@ -291,7 +291,7 @@ BOOL Heap<TAlloc, TPreReservedAlloc>::ProtectAllocationWithExecuteReadWrite(Allo
     {
         protectFlags = PAGE_EXECUTE_READWRITE;
     }
-    return this->ProtectAllocation(allocation, protectFlags, PAGE_EXECUTE, addressInPage);
+    return this->ProtectAllocation(allocation, protectFlags, PAGE_EXECUTE_READ, addressInPage);
 }
 
 template<typename TAlloc, typename TPreReservedAlloc>
@@ -304,7 +304,7 @@ BOOL Heap<TAlloc, TPreReservedAlloc>::ProtectAllocationWithExecuteReadOnly(Alloc
     }
     else
     {
-        protectFlags = PAGE_EXECUTE;
+        protectFlags = PAGE_EXECUTE_READ;
     }
     return this->ProtectAllocation(allocation, protectFlags, PAGE_EXECUTE_READWRITE, addressInPage);
 }
@@ -418,7 +418,7 @@ Allocation* Heap<TAlloc, TPreReservedAlloc>::AllocLargeObject(size_t bytes, usho
             }
             else
             {
-                protectFlags = PAGE_EXECUTE;
+                protectFlags = PAGE_EXECUTE_READ;
             }
             this->codePageAllocators->ProtectPages(address, pages, segment, protectFlags /*dwVirtualProtectFlags*/, PAGE_READWRITE /*desiredOldProtectFlags*/);
         }
@@ -444,7 +444,7 @@ Allocation* Heap<TAlloc, TPreReservedAlloc>::AllocLargeObject(size_t bytes, usho
             MemoryOperationLastError::RecordLastErrorAndThrow();
         }
     }
-    Assert(memBasicInfo.Protect == PAGE_EXECUTE);
+    Assert(memBasicInfo.Protect == PAGE_EXECUTE_READ);
 #endif
 
     Allocation* allocation = this->largeObjectAllocations.PrependNode(this->auxiliaryAllocator);
@@ -679,7 +679,7 @@ Page* Heap<TAlloc, TPreReservedAlloc>::AllocNewPage(BucketId bucket, bool canAll
     }
     else
     {
-        protectFlags = PAGE_EXECUTE;
+        protectFlags = PAGE_EXECUTE_READ;
     }
 
     //Change the protection of the page to Read-Only Execute, before adding it to the bucket list.
@@ -870,7 +870,7 @@ bool Heap<TAlloc, TPreReservedAlloc>::FreeAllocation(Allocation* object)
 
         FreeAllocationHelper(object, index, length);
 
-        // after freeing part of the page, the page should be in PAGE_EXECUTE_READWRITE protection, and turning to PAGE_EXECUTE (always with TARGETS_NO_UPDATE state)
+        // after freeing part of the page, the page should be in PAGE_EXECUTE_READWRITE protection, and turning to PAGE_EXECUTE_READ (always with TARGETS_NO_UPDATE state)
 
         DWORD protectFlags = 0;
 
@@ -880,7 +880,7 @@ bool Heap<TAlloc, TPreReservedAlloc>::FreeAllocation(Allocation* object)
         }
         else
         {
-            protectFlags = PAGE_EXECUTE;
+            protectFlags = PAGE_EXECUTE_READ;
         }
 
         this->codePageAllocators->ProtectPages(page->address, 1, segment, protectFlags, PAGE_EXECUTE_READWRITE);

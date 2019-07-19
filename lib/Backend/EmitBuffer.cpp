@@ -304,7 +304,7 @@ EmitBufferManager<TAlloc, TPreReservedAlloc, SyncObject>::AllocateBuffer(__in si
             return nullptr;
         }
     }
-    Assert(resultBytes != 0 && memBasicInfo.Protect == PAGE_EXECUTE);
+    Assert(resultBytes != 0 && memBasicInfo.Protect == PAGE_EXECUTE_READ);
 #endif
 
     return allocation;
@@ -342,7 +342,7 @@ bool EmitBufferManager<TAlloc, TPreReservedAlloc, SyncObject>::IsBufferExecuteRe
     AutoRealOrFakeCriticalSection<SyncObject> autoCs(&this->criticalSection);
     MEMORY_BASIC_INFORMATION memBasicInfo;
     size_t resultBytes = VirtualQuery(allocation->allocation->address, &memBasicInfo, sizeof(memBasicInfo));
-    return resultBytes != 0 && memBasicInfo.Protect == PAGE_EXECUTE;
+    return resultBytes != 0 && memBasicInfo.Protect == PAGE_EXECUTE_READ;
 }
 #endif
 

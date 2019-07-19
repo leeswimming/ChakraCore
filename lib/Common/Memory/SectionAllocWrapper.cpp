@@ -460,7 +460,7 @@ SectionAllocWrapper::Alloc(LPVOID requestAddress, size_t dwSize, DWORD allocatio
     AutoEnableDynamicCodeGen enableCodeGen(true);
 #endif
 
-    const DWORD allocProtectFlags = AutoSystemInfo::Data.IsCFGEnabled() ? PAGE_EXECUTE_RO_TARGETS_INVALID : PAGE_EXECUTE;
+    const DWORD allocProtectFlags = AutoSystemInfo::Data.IsCFGEnabled() ? PAGE_EXECUTE_RO_TARGETS_INVALID : PAGE_EXECUTE_READ;
 
     // for new allocations, create new section and fully map it (reserved) into runtime process
     if (requestAddress == nullptr)
@@ -625,7 +625,7 @@ PreReservedSectionAllocWrapper::IsInRange(void * address)
     {
         MEMORY_BASIC_INFORMATION memBasicInfo;
         size_t bytes = VirtualQueryEx(this->process, address, &memBasicInfo, sizeof(memBasicInfo));
-        Assert(bytes != 0 && memBasicInfo.State == MEM_COMMIT && memBasicInfo.AllocationProtect == PAGE_EXECUTE);
+        Assert(bytes != 0 && memBasicInfo.State == MEM_COMMIT && memBasicInfo.AllocationProtect == PAGE_EXECUTE_READ);
     }
 #endif
     return isInRange;
@@ -691,7 +691,7 @@ LPVOID PreReservedSectionAllocWrapper::EnsurePreReservedRegionInternal()
         return startAddress;
     }
 
-    const DWORD allocProtectFlags = AutoSystemInfo::Data.IsCFGEnabled() ? PAGE_EXECUTE_RO_TARGETS_INVALID : PAGE_EXECUTE;
+    const DWORD allocProtectFlags = AutoSystemInfo::Data.IsCFGEnabled() ? PAGE_EXECUTE_RO_TARGETS_INVALID : PAGE_EXECUTE_READ;
     size_t bytes = PreReservedAllocationSegmentCount * AutoSystemInfo::Data.GetAllocationGranularityPageSize();
     if (PHASE_FORCE1(Js::PreReservedHeapAllocPhase))
     {
@@ -851,7 +851,7 @@ LPVOID PreReservedSectionAllocWrapper::Alloc(LPVOID lpAddress, size_t dwSize, DW
             AutoEnableDynamicCodeGen enableCodeGen;
 #endif
 
-            const DWORD allocProtectFlags = AutoSystemInfo::Data.IsCFGEnabled() ? PAGE_EXECUTE_RO_TARGETS_INVALID : PAGE_EXECUTE;
+            const DWORD allocProtectFlags = AutoSystemInfo::Data.IsCFGEnabled() ? PAGE_EXECUTE_RO_TARGETS_INVALID : PAGE_EXECUTE_READ;
             allocatedAddress = (char *)VirtualAllocEx(this->process, addressToReserve, dwSize, MEM_COMMIT, allocProtectFlags);
             if (allocatedAddress == nullptr)
             {
